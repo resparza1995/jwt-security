@@ -2,6 +2,7 @@ package spring.jwtsecurity.controller;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class AuthController {
     JwtProvider jwtProvider;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<?> newUser(@RequestBody NewUser newUser, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors())
@@ -101,7 +102,7 @@ public class AuthController {
     }
     
 	@PreAuthorize("hasRole('ADMIN')")
-	@GetMapping("/listAll")
+	@GetMapping
 	public ResponseEntity<List<User>> list(){
 		
 		List<User> list = userService.list();
@@ -109,8 +110,19 @@ public class AuthController {
 		return new ResponseEntity<List<User>>(list, HttpStatus.OK);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
+	@GetMapping("/{id}")
+	public ResponseEntity<User> findById(@PathVariable("id") int id){
+		
+		Optional<User> userOpt = userService.findById(id);
+		User user = (userOpt.isEmpty()) ? new User() : userOpt.get();
+		
+		ResponseEntity<User> response = new ResponseEntity<User>(user, HttpStatus.OK);
+		return response;
+	}
+	
 	@PreAuthorize("hasRole('ADMIN') ||  hasRole('SUPERUSER')")
-	@DeleteMapping("/delete/{id}")
+	@DeleteMapping("/{id}")
 	public ResponseEntity<?> delete(@PathVariable("id") int id){
 						
 		userService.deleteById(id);
